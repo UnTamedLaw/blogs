@@ -3,6 +3,9 @@
 {% block content %}
     <h1>Home Page</h1> 
     <h2> Users </h2>
+{% if blogs|length == 0 %}
+    <p> No users yet </p>
+{% else %}
 
     <ul>
         {% for user in users %}
@@ -10,4 +13,5 @@
        
         {% endfor %}
     </ul>
+{% endif %}
 {% endblock %}

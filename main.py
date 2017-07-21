@@ -34,7 +34,7 @@ class User(db.Model):
     password = db.Column(db.String(120))
     blogs = db.relationship('Blog', backref='owner')
 
-    def __int__(self, username, password):
+    def __init__(self, username, password):
         self.username = username
         self.password = password
 
@@ -53,15 +53,13 @@ def index():
 @app.route('/blog', methods =['POST', 'GET'])
 def blog():
 
-    owner = User.query.filter_by(username=session['username']).first()
-
     if request.args:
         blog_id = request.args.get('id')
         blog = Blog.query.get(blog_id)
         return render_template('blogPage.html', blog=blog)
 
-    total_blogs = Blog.query.filter_by(deleted=False, owner=owner).all()
-    deleted_blogs = Blog.query.filter_by(deleted=True, owner=owner).all()
+    total_blogs = Blog.query.filter_by(deleted=False).all()
+    deleted_blogs = Blog.query.filter_by(deleted=True).all()
     return render_template('blog.html', title='Build a Blog!', blogs=total_blogs, deletedBlogs= deleted_blogs)
 
 @app.route('/newpost', methods =['POST', 'GET'])
@@ -71,7 +69,6 @@ def newpost():
 
         blog_title = request.form['blogTitle']
         blog_body = request.form['blogBody']
-       
 
         title_error = ''
         body_error = ''
@@ -91,7 +88,7 @@ def newpost():
         
         else:
 
-            blog = Blog(blog_title, blog_body, blog_id)
+            blog = Blog(blog_title, blog_body)
             db.session.add(blog)
             db.session.commit()
             blogId = blog.id
@@ -118,25 +115,31 @@ def signup():
         verify = request.form['verify']
 
         existing_user = User.query.filter_by(username=username).first()
-        if not existing_user:
+        error=''
+         
+        if username == '' or password == '' or verify == '':
+            flash('One more fields are blank', 'error')
+            error="yes"
+        elif existing_user:
+            flash('Username already exists', 'error')
+            error="yes"       
+        elif password != verify:
+            flash('Passwords do not match', 'error')
+            error="yes"
+
+        elif len(password) < 3 or len(username) < 3:
+            flash('Invalid username or password, must be greater than 3 characters' , 'error') 
+            error="yes"
+            
+        if error:
+            return render_template('signup.html')
+        else:
             new_user = User(username, password)
             db.session.add(new_user)
             db.session.commit()
             session['username'] = username
             flash('Sucessful registration', 'success')
             return redirect('/newpost')
-
-        elif username == '' or password == '' or verify == '':
-            flash('One more fields are blank', 'error')
-            
-        elif existing_user:
-            flash('Username already exists', 'error')
-            
-        elif password != verify:
-            flash('Passwords do not match', 'error')
-        elif len(password) < 3 or len(username) < 3:
-            flash('Invalid username or password, must be greater than 3 characters' , 'error') 
-
     return render_template('signup.html')
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -152,11 +155,11 @@ def login():
             
             return redirect('/index')
 
-        if username != user:
+        elif username != user:
             flash('User does not exist', 'error')
             return redirect('/login')
 
-        if user.password != password:
+        elif user.password != password:
             flash('User password is incorrect', 'error')    
             return redirect('/login')
 
@@ -164,11 +167,8 @@ def login():
 
 @app.route('/index')
 def home():
-    users = User.query.filter_by(username=username).first.all()
+    users = User.query.filter_by(username='1').first()
     return render_template('index.html', users=users)
-    
-
-    
 
 @app.route('/logout')
 def logout():
