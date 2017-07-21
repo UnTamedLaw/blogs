@@ -40,7 +40,7 @@ class User(db.Model):
 
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'signup', 'blog', 'index']
+    allowed_routes = ['login', 'signup', 'blog', 'index','logout']
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
 
@@ -61,6 +61,8 @@ def blog():
     total_blogs = Blog.query.filter_by(deleted=False).all()
     deleted_blogs = Blog.query.filter_by(deleted=True).all()
     return render_template('blog.html', title='Build a Blog!', blogs=total_blogs, deletedBlogs= deleted_blogs)
+
+
 
 @app.route('/newpost', methods =['POST', 'GET'])
 def newpost():
@@ -100,15 +102,7 @@ def newpost():
 
     return render_template('newpost.html')
 
-@app.route('/delete-blog', methods=['POST'])
-def delete_blog():
 
-    blog_id = int(request.form['blog-id'])
-    blogd = Blog.query.get(blog_id)
-    blogd.deleted = True
-    db.session.add(blogd)
-    db.session.commit()
-    return redirect('/')
 
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
