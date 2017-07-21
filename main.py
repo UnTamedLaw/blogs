@@ -126,7 +126,7 @@ def signup():
             flash('Sucessful registration', 'success')
             return redirect('/newpost')
 
-        elif username = '' or password = '' or verify = '':
+        elif username == '' or password == '' or verify == '':
             flash('One more fields are blank', 'error')
             
         elif existing_user:
@@ -164,7 +164,10 @@ def login():
 
 @app.route('/index')
 def home():
+    users = User.query.filter_by(username=username).first.all()
+    return render_template('index.html', users=users)
     
+
     
 
 @app.route('/logout')
