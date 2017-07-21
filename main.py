@@ -46,7 +46,7 @@ def require_login():
 
 
 @app.route('/', methods=['POST', 'GET'])
-def index():
+def main():
     
     return redirect('/index')
 
@@ -86,7 +86,7 @@ def newpost():
         if body_error or title_error:
             return render_template('newpost.html', title_error = title_error, body_error = body_error,
             blogTitle = blog_title,
-            blogBody = blog_body)    
+            blogBody = blog_body)   
         
         else:
 
@@ -135,7 +135,7 @@ def signup():
             error="yes"
             
         if error:
-            return render_template('signup.html')
+            return render_template('signup.html', username=username)
         else:
             new_user = User(username, password)
             db.session.add(new_user)
@@ -160,16 +160,16 @@ def login():
 
         elif username != user:
             flash('User does not exist', 'error')
-            return render_template('/login')
+            return render_template('/login.html')
 
         elif user.password != password:
             flash('User password is incorrect', 'error')    
-            return render_template('/login')
+            return render_template('/login.html')
 
     return render_template('login.html')
 
 @app.route('/index')
-def home():
+def index():
     users = User.query.all()
     return render_template('index.html', users=users)
 
