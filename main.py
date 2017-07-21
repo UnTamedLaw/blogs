@@ -16,7 +16,7 @@ class Blog(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120))
-    body = db.Column(db.String(500))
+    body = db.Column(db.String(10000))
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     deleted = db.Column(db.Boolean)
 
@@ -65,11 +65,13 @@ def blog():
 @app.route('/newpost', methods =['POST', 'GET'])
 def newpost():
 
+
     if request.method == 'POST':
 
         blog_title = request.form['blogTitle']
         blog_body = request.form['blogBody']
-
+        owner = User.query.filter_by(username=session['username']).first()
+        
         title_error = ''
         body_error = ''
 
@@ -88,7 +90,7 @@ def newpost():
         
         else:
 
-            blog = Blog(blog_title, blog_body)
+            blog = Blog(blog_title, blog_body, owner)
             db.session.add(blog)
             db.session.commit()
             blogId = blog.id
@@ -97,6 +99,7 @@ def newpost():
             return redirect('/blog' + link)
 
     return render_template('newpost.html')
+
 @app.route('/delete-blog', methods=['POST'])
 def delete_blog():
 
@@ -157,17 +160,17 @@ def login():
 
         elif username != user:
             flash('User does not exist', 'error')
-            return redirect('/login')
+            return render_template('/login')
 
         elif user.password != password:
             flash('User password is incorrect', 'error')    
-            return redirect('/login')
+            return render_template('/login')
 
     return render_template('login.html')
 
 @app.route('/index')
 def home():
-    users = User.query.filter_by(username='1').first()
+    users = User.query.all()
     return render_template('index.html', users=users)
 
 @app.route('/logout')
