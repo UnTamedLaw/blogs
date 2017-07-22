@@ -66,9 +66,13 @@ def blog():
 
 @app.route('/singleUser', methods=['POST', 'GET'])
 def singleUser():
-    username = User.query.filter_by(username=session['username']).first()
-    blogs = Blog.query.filter_by(id=username).all()
-    return render_template('singleUser.html', blogs=blogs)
+    if request.args:
+        userId=request.args.get('user')
+        blogs= Blog.query.filter_by(owner_id=userId).all()
+        return render_template('singleUser.html', blogs=blogs)
+    total_blogs = Blog.query.filter_by(deleted=False).all()
+    return render_template('blog.html', title='Build a Blog!', blogs=total_blogs)
+
 
 @app.route('/newpost', methods =['POST', 'GET'])
 def newpost():
