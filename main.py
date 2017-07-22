@@ -20,6 +20,7 @@ class Blog(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     deleted = db.Column(db.Boolean)
 
+    user = db.relationship('User') 
 
     def __init__(self, title, body, owner):
         self.title = title
@@ -58,11 +59,15 @@ def blog():
         blog = Blog.query.get(blog_id)
         return render_template('blogPage.html', blog=blog)
 
+
     total_blogs = Blog.query.filter_by(deleted=False).all()
     deleted_blogs = Blog.query.filter_by(deleted=True).all()
     return render_template('blog.html', title='Build a Blog!', blogs=total_blogs, deletedBlogs= deleted_blogs)
 
-
+@app.route('/singleUser', methods=['POST', 'GET'])
+def singleUser():
+    blogs = Blog.query.filter_by(username=username).all()
+    return render_template('singleUser.html', blogs=blogs)
 
 @app.route('/newpost', methods =['POST', 'GET'])
 def newpost():
