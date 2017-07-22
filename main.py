@@ -66,7 +66,8 @@ def blog():
 
 @app.route('/singleUser', methods=['POST', 'GET'])
 def singleUser():
-    blogs = Blog.query.filter_by(username=username).all()
+    username = User.query.filter_by(username=session['username']).first()
+    blogs = Blog.query.filter_by(id=username).all()
     return render_template('singleUser.html', blogs=blogs)
 
 @app.route('/newpost', methods =['POST', 'GET'])
