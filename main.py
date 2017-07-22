@@ -179,9 +179,11 @@ def index():
 
 @app.route('/logout')
 def logout():
-    del session['username']
-    return redirect('/blog')
-
+    if session:
+        del session['username']
+        return redirect('/blog')
+    else:
+        return redirect('/')
 
 
 if __name__ == '__main__':
